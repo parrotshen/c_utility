@@ -1,0 +1,16 @@
+# This is an input file for 'raw_send'
+00 50 56 E9 42 F0  # Destination MAC address
+00 0C 29 4F C5 6A  # Source MAC address
+08 00              # Protocol type
+
+45 00 00 54
+00 00 40 00
+40 01 F9 05
+C0 A8 60 50  # Source IP 192.168.96.80
+C0 A8 60 02  # Destination IP 192.168.96.2
+
+# ICMP
+08 00 4E 2E 50 03 00 00 C2 D1 1C 4B 76 B1 04 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
