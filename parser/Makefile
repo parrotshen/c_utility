@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall
 LDFLAGS = 
 
-all: libparser.a libparser.so text hex ipv4 ipv6
+all: libparser.a libparser.so text hex ipv4 ipv6 plmn
 
 libparser.a: libparser.o
 	$(AR) rcs $@ $<
@@ -23,10 +23,13 @@ ipv4: ipv4.o libparser.o
 ipv6: ipv6.o libparser.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
+plmn: plmn.o libparser.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
 %.o: %.c libparser.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
 	rm -f libparser.a libparser.so
-	rm -f text hex ipv4 ipv6
+	rm -f text hex ipv4 ipv6 plmn
 	rm -f *.o

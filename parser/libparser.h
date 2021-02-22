@@ -125,6 +125,26 @@ int str2hex(char *pStr, unsigned char *pBuf, int bufSize);
 
 
 /**
+ * Convert byte array data to PLMN ID string.
+ * @param [in]   pPlmn     Byte array data.
+ * @param [in]   plmnSize  Byte array data size.
+ * @param [out]  pBuf      String buffer.
+ * @param [in]   bufSize   String buffer size.
+ * @returns  String length.
+ */
+int plmn2str(void *pPlmn, int plmnSize, char *pBuf, int bufSize);
+
+/**
+ * Convert PLMN ID string to byte array.
+ * @param [in]   pStr     PLMN ID string.
+ * @param [out]  pBuf     Byte array buffer.
+ * @param [in]   bufSize  Byte array buffer size.
+ * @returns  Data length.
+ */
+int str2plmn(char *pStr, unsigned char *pBuf, int bufSize);
+
+
+/**
  * Dump memory.
  * @param [in]  pDesc  Description string.
  * @param [in]  pAddr  Memory address.

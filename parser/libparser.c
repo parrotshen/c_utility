@@ -443,40 +443,26 @@ static unsigned char _hex2dec(char ch)
 
     switch ( ch )
     {
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
             val = (ch - '0');
             break;
-        case 'a':
-        case 'A':
+        case 'a': case 'A':
             val = 10;
             break;
-        case 'b':
-        case 'B':
+        case 'b': case 'B':
             val = 11;
             break;
-        case 'c':
-        case 'C':
+        case 'c': case 'C':
             val = 12;
             break;
-        case 'd':
-        case 'D':
+        case 'd': case 'D':
             val = 13;
             break;
-        case 'e':
-        case 'E':
+        case 'e': case 'E':
             val = 14;
             break;
-        case 'f':
-        case 'F':
+        case 'f': case 'F':
             val = 15;
             break;
         default:
@@ -545,6 +531,164 @@ int str2hex(char *pStr, unsigned char *pBuf, int bufSize)
 
     return j;
 }
+
+
+/**
+ * Convert byte array data to PLMN ID string.
+ * @param [in]   pPlmn     Byte array data.
+ * @param [in]   plmnSize  Byte array data size.
+ * @param [out]  pBuf      String buffer.
+ * @param [in]   bufSize   String buffer size.
+ * @returns  String length.
+ */
+int plmn2str(void *pPlmn, int plmnSize, char *pBuf, int bufSize)
+{
+    unsigned char *pByte = pPlmn;
+
+    if (plmnSize != 3)
+    {
+        pBuf[0] = 0x00;
+        fprintf(
+            stderr,
+            "%s: incorrect PLMN ID length %d\n",
+            __func__,
+            plmnSize
+        );
+        return 0;
+    }
+
+    if (bufSize < 8)
+    {
+        pBuf[0] = 0x00;
+        fprintf(
+            stderr,
+            "%s: un-enough output buffer length %d\n",
+            __func__,
+            bufSize
+        );
+        return 0;
+    }
+
+    if (((pByte[1] & 0xF0) >> 4) == 0xF)
+    {
+        /*
+        * Example:
+        *   Input   0x64 0xF6 0x29
+        *   Output  "466.92"
+        */
+        sprintf(
+            pBuf,
+            "%u%u%u.%u%u",
+            ((pByte[0] & 0x0F)     ),
+            ((pByte[0] & 0xF0) >> 4),
+            ((pByte[1] & 0x0F)     ),
+            ((pByte[2] & 0x0F)     ),
+            ((pByte[2] & 0xF0) >> 4)
+        );
+    }
+    else
+    {
+        /*
+        * Example:
+        *   Input   0x21 0x43 0x65
+        *   Output  "123.456"
+        */
+        sprintf(
+            pBuf,
+            "%u%u%u.%u%u%u",
+            ((pByte[0] & 0x0F)     ),
+            ((pByte[0] & 0xF0) >> 4),
+            ((pByte[1] & 0x0F)     ),
+            ((pByte[1] & 0xF0) >> 4),
+            ((pByte[2] & 0x0F)     ),
+            ((pByte[2] & 0xF0) >> 4)
+        );
+    }
+
+    return strlen( pBuf );
+}
+
+/**
+ * Convert PLMN ID string to byte array.
+ * @param [in]   pStr     PLMN ID string.
+ * @param [out]  pBuf     Byte array buffer.
+ * @param [in]   bufSize  Byte array buffer size.
+ * @returns  Data length.
+ */
+int str2plmn(char *pStr, unsigned char *pBuf, int bufSize)
+{
+    int len;
+
+    len = strlen( pStr );
+
+    if ((len != 6) && (len != 7))
+    {
+        memset(pBuf, 0x00, bufSize);
+        fprintf(
+            stderr,
+            "%s: wrong input string length %d\n",
+            __func__,
+            len
+        );
+        return 0;
+    }
+
+    if (pStr[3] != '.')
+    {
+        memset(pBuf, 0x00, bufSize);
+        fprintf(
+            stderr,
+            "%s: wrong input string format %s\n",
+            __func__,
+            pStr
+        );
+        return 0;
+    }
+
+    if (bufSize < 3)
+    {
+        memset(pBuf, 0x00, bufSize);
+        fprintf(
+            stderr,
+            "%s: un-enough output buffer length %d\n",
+            __func__,
+            bufSize
+        );
+        return 0;
+    }
+
+    if (6 == len)
+    {
+        /*
+        * Example:
+        *   Input   "466.92"
+        *   Output  0x64 0xF6 0x29
+        */
+        pBuf[0]  = (((pStr[0] - '0') & 0xF)     );
+        pBuf[0] |= (((pStr[1] - '0') & 0xF) << 4);
+        pBuf[1]  = (((pStr[2] - '0') & 0xF)     );
+        pBuf[1] |= 0xF0;
+        pBuf[2]  = (((pStr[4] - '0') & 0xF)     );
+        pBuf[2] |= (((pStr[5] - '0') & 0xF) << 4);
+    }
+    else
+    {
+        /*
+        * Example:
+        *   Input   "123.456"
+        *   Output  0x21 0x43 0x65
+        */
+        pBuf[0]  = (((pStr[0] - '0') & 0xF)     );
+        pBuf[0] |= (((pStr[1] - '0') & 0xF) << 4);
+        pBuf[1]  = (((pStr[2] - '0') & 0xF)     );
+        pBuf[1] |= (((pStr[4] - '0') & 0xF) << 4);
+        pBuf[2]  = (((pStr[5] - '0') & 0xF)     );
+        pBuf[2] |= (((pStr[6] - '0') & 0xF) << 4);
+    }
+
+    return 3;
+}
+
 
 
 /**
