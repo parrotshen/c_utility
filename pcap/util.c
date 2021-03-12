@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,39 @@
 // /////////////////////////////////////////////////////////////////////////////
 //    Functions
 // /////////////////////////////////////////////////////////////////////////////
+
+void dump(void *pAddr, int len)
+{
+    unsigned char *pByte = pAddr;
+    int i;
+
+    if ( pByte )
+    {
+        for (i=0; i<len; i++)
+        {
+            if ((i != 0) && ((i % 16) == 0))
+            {
+                printf("\n");
+            }
+            printf(" %02X", pByte[i]);
+        }
+        printf("\n");
+        printf(" (%d bytes)\n", len);
+        printf("\n");
+    }
+}
+
+long file_size(char *pIn)
+{
+    struct stat  stat_buf;
+
+    if ( !stat(pIn, &stat_buf) )
+    {
+        return stat_buf.st_size;
+    }
+
+    return 0;
+}
 
 char *get_token(char *pLine, char *pToken, int tsize)
 {
