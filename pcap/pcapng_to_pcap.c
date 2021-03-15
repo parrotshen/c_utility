@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
     FILE *pOut = NULL;
     unsigned char *pBlock = NULL;
     unsigned int   bufferSize = 0;
+    unsigned int   blockNum = 0;
     unsigned int   blockType;
     unsigned int   blockLen;
     unsigned int   temp;
@@ -174,6 +175,15 @@ int main(int argc, char *argv[])
             printf("ERR: fail to read block type\n\n");
             goto _EXIT;
         }
+        if ((0 == blockNum) &&
+            (PCAPNG_ID_SECTION_HEADER_BLOCK != blockType))
+        {
+            printf("ERR: not a .pcapng file\n\n");
+            goto _EXIT;
+        }
+
+        blockNum++;
+
         retval = fread(&blockLen, 4, 1, pIn);
         if (retval != 1)
         {
