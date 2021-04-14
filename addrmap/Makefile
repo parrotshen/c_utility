@@ -1,9 +1,12 @@
 CC = gcc
 
-all: addrmap
+all: addrmap memsize
 
 addrmap: addrmap.c
 	$(CC) -Wall $^ -o $@
 
+memsize: memsize.c
+	$(CC) -Wall $^ -o $@
+
 clean:
-	rm -f addrmap
+	rm -f addrmap memsize

@@ -6,9 +6,15 @@
 unsigned long long parse_hex_string(char *pHex)
 {
     unsigned long long val = 0;
+    int offset = 0;
     int i;
 
-    for (i=0; i<strlen(pHex) && i<16; i++)
+    if ((strlen(pHex) > 2) && ('0' == pHex[0]) && ('x' == pHex[1]))
+    {
+        offset = 2;
+    }
+
+    for (i=offset; i<strlen(pHex) && i<16; i++)
     {
         val <<= 4;
 
@@ -41,10 +47,25 @@ int main(int argc, char *argv[])
     int width[2];
     int i;
 
+    /*
+    * +-------------------------+ \
+    * | ADDR                    | |
+    * +-------------------------+ |
+    * | ADDR + (SIZE * 1)       | |
+    * +-------------------------+ |
+    * | ADDR + (SIZE * 2)       | |
+    * +-------------------------+ | NUMBER (N)
+    * | ADDR + ...              | |
+    * +-------------------------+ |
+    * | ADDR + (SIZE * (N - 2)) | |
+    * +-------------------------+ |
+    * | ADDR + (SIZE * (N - 1)) | |
+    * +-------------------------+ /
+    */
     if (argc < 4)
     {
-        printf("Usage: addrmap ADDR_BASE ADDR_SIZE NUMBER\n");
-        printf("               (HEX)     (HEX)     (DEC)\n\n");
+        printf("Usage: addrmap BASE_ADDR MEMORY_SIZE NUMBER\n");
+        printf("               (HEX)     (HEX)       (DEC)\n\n");
         return 0;
     }
 
