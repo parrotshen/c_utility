@@ -16,7 +16,6 @@ typedef signed short    int16;
 typedef signed int      int32;
 
 
-uint32_t
-crc32(uint32_t crc, const void *buf, size_t size);
+uint32 crc32(uint32 crc, void *pBuf, size_t size);
 
 #endif
