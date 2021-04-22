@@ -84,7 +84,7 @@ void mem_dump(char *name, const void *addr, unsigned int len)
         return;
     }
 
-    printf("%s (%d bytes)\n", name, len);
+    printf("%s (%u bytes)\n", name, len);
     for(i=0; i<len; i++)
     {
         if ((i != 0) && ((i % 16) == 0))
@@ -127,16 +127,17 @@ int read_line(FILE *fp, char *line, int lsize)
 {
     line[0] = 0x0;
 
+    if ( feof(fp) )
+    {
+        return 0;
+    }
+
     /* char *fgets(                                   */
     /*     char *s,      // character array to store  */
     /*     int   n,      // length to read            */
     /*     FILE *stream  // FILE pointer              */
     /* );                                             */
     fgets(line, lsize, fp);
-    if ( feof(fp) )
-    {
-        return 0;
-    }
 
     /* remove the CR/LF character */
     if ((strlen(line) > 0) && (line[strlen(line)-1] == 0x0a))
@@ -176,7 +177,7 @@ int read_file(char *filename, unsigned char *buffer, int bsize)
         do
         {
             next = get_token(next, token, TOKEN_SIZE);
-            if ((token[0] == 0x0) || (token[0] == '#'))
+            if ((0x0 == token[0]) || ('#' == token[0]))
             {
                 /* ignore the comment and null line */
                 break;

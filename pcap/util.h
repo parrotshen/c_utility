@@ -50,7 +50,7 @@
 //    Functions
 // /////////////////////////////////////////////////////////////////////////////
 
-void dump(void *pAddr, int len);
+void dump(void *pAddr, unsigned int len);
 long file_size(char *pIn);
 char *get_token(char *pLine, char *pToken, int tsize);
 int read_line(FILE *pFile, char *pLine, int lsize);

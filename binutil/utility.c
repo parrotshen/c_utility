@@ -27,7 +27,6 @@ void dump(const void *pAddr, unsigned int size)
         return;
     }
 
-    printf("size = %d\n", size);
     for (i=0; i<size; i++)
     {
         if ((i != 0) && ((i % 16) == 0))
@@ -37,7 +36,9 @@ void dump(const void *pAddr, unsigned int size)
 
         printf(" %02X", pByte[i]);
     }
-    printf("\n\n");
+    printf("\n");
+    printf(" (%u bytes)\n", size);
+    printf("\n");
 }
 
 unsigned char *hexstr2byte(char *pStr, unsigned int *pLen)

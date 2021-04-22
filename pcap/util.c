@@ -32,10 +32,10 @@
 //    Functions
 // /////////////////////////////////////////////////////////////////////////////
 
-void dump(void *pAddr, int len)
+void dump(void *pAddr, unsigned int len)
 {
     unsigned char *pByte = pAddr;
-    int i;
+    unsigned int i;
 
     if ( pByte )
     {
@@ -48,7 +48,7 @@ void dump(void *pAddr, int len)
             printf(" %02X", pByte[i]);
         }
         printf("\n");
-        printf(" (%d bytes)\n", len);
+        printf(" (%u bytes)\n", len);
         printf("\n");
     }
 }
@@ -93,16 +93,17 @@ int read_line(FILE *pFile, char *pLine, int lsize)
 {
     pLine[0] = 0x0;
 
+    if ( feof(pFile) )
+    {
+        return 0;
+    }
+
     /* char *fgets(                                   */
     /*     char *s,      // character array to store  */
     /*     int   n,      // length to read            */
     /*     FILE *stream  // FILE pointer              */
     /* );                                             */
     fgets(pLine, lsize, pFile);
-    if ( feof(pFile) )
-    {
-        return 0;
-    }
 
     /* remove the CR/LF character */
     if ((strlen(pLine) > 0) && (pLine[strlen(pLine)-1] == 0x0a))
@@ -142,7 +143,7 @@ unsigned int read_file(char *pIn, unsigned char *pBuf, unsigned int bsize)
         do
         {
             pNext = get_token(pNext, token, TOKEN_SIZE);
-            if ((token[0] == 0x0) || (token[0] == '#'))
+            if ((0x0 == token[0]) || ('#' == token[0]))
             {
                 /* ignore the comment and null line */
                 break;
