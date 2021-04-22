@@ -1,0 +1,16 @@
+CC = gcc
+CFLAGS = -Wall -I../parser
+LDFLAGS = -L../parser -lparser
+
+all: ip_csum
+
+ip_csum: ip_csum.o
+	$(CC) $^ $(LDFLAGS) -o $@
+
+ip_csum.o: ip_csum.c
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	rm -f ip_csum *.o
+
+.PHONY: all clean

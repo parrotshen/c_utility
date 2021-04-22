@@ -21,6 +21,47 @@
 // /////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Convert HEX to DEC.
+ * @param [in]  ch  HEX character (0 ~ F).
+ * @returns  Integer 0 ~ 15.
+ */
+static unsigned char _hex2dec(char ch)
+{
+    unsigned char val = 0;
+
+    switch ( ch )
+    {
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            val = (ch - '0');
+            break;
+        case 'a': case 'A':
+            val = 10;
+            break;
+        case 'b': case 'B':
+            val = 11;
+            break;
+        case 'c': case 'C':
+            val = 12;
+            break;
+        case 'd': case 'D':
+            val = 13;
+            break;
+        case 'e': case 'E':
+            val = 14;
+            break;
+        case 'f': case 'F':
+            val = 15;
+            break;
+        default:
+            ;
+    }
+
+    return val;
+}
+
+
+/**
  * Bypass number of tokens in a string.
  * @param [in]  num      Number of tokens.
  * @param [in]  pString  Input string.
@@ -91,16 +132,17 @@ int parse_line(FILE *pFile, char *pLine, int lsize)
 {
     pLine[0] = 0x0;
 
+    if ( feof(pFile) )
+    {
+        return 0;
+    }
+
     /* char *fgets(                                   */
     /*     char *s,      // character array to store  */
     /*     int   n,      // length to read            */
     /*     FILE *stream  // FILE pointer              */
     /* );                                             */
     fgets(pLine, lsize, pFile);
-    if ( feof(pFile) )
-    {
-        return 0;
-    }
 
     /* remove the CR/LF character */
     if ((strlen(pLine) > 0) && (pLine[strlen(pLine)-1] == 0x0a))
@@ -134,8 +176,9 @@ int parse_string_into_token(char *pString, tParseTokenCb pParseFunc)
         return 0;
     }
 
-    while ( (pNext = parse_token(pNext, token, TOKEN_SIZE)) )
+    do
     {
+        pNext = parse_token(pNext, token, TOKEN_SIZE);
         if ( token[0] )
         {
             action = pParseFunc(token, strlen( token ), count);
@@ -143,7 +186,7 @@ int parse_string_into_token(char *pString, tParseTokenCb pParseFunc)
 
             if (PARSE_STOP == action) break;
         }
-    }
+    } while ( pNext );
 
     return count;
 }
@@ -179,6 +222,81 @@ int parse_file_into_line(char *pFileName, tParseLineCb pParseFunc)
     fclose( pInput );
 
     return count;
+}
+
+/**
+ * Parse a HEX string file to byte array.
+ * @param [in]   pFileName  Input file name.
+ * @param [out]  pBuf       Byte array buffer.
+ * @param [in]   bufSize    Byte array buffer size.
+ * @returns  Data length.
+ */
+unsigned int parse_hex_string_file(
+    char          *pFileName,
+    unsigned char *pBuf,
+    unsigned int   bufSize
+)
+{
+    FILE *pInput = NULL;
+    char  line[LINE_SIZE+1];
+    char  token[TOKEN_SIZE+1];
+    char *pNext;
+
+    unsigned char  nibbleH;
+    unsigned char  nibbleL;
+    unsigned int   len;
+
+
+    if ((pInput=fopen(pFileName, "r")) == NULL)
+    {
+        printf("%s: cannot open file %s\n", __func__, pFileName);
+        return 0;
+    }
+
+    /* start reading input file */
+    len = 0;
+    while ( parse_line(pInput, line, LINE_SIZE) )
+    {
+        pNext = line;
+
+        do
+        {
+            pNext = parse_token(pNext, token, TOKEN_SIZE);
+            if ((0x0 == token[0]) || ('#' == token[0]))
+            {
+                /* ignore the null or comment line */
+                break;
+            }
+
+            if (len >= bufSize)
+            {
+                printf("%s: un-enough buffer size (%u)\n", __func__, bufSize);
+                goto _EXIT_PARSE;
+            }
+
+            if (strlen( token ) > 2)
+            {
+                printf("%s: wrong HEX token (%s)\n", __func__, token);
+                goto _EXIT_PARSE;
+            }
+            else if (strlen( token ) > 1)
+            {
+                nibbleH = _hex2dec( token[0] );
+                nibbleL = _hex2dec( token[1] );
+
+                pBuf[len++] = ((nibbleH << 4) | (nibbleL));
+            }
+            else
+            {
+                pBuf[len++] = _hex2dec( token[0] );
+            }
+        } while ( pNext );
+    }
+
+_EXIT_PARSE:
+    fclose( pInput );
+
+    return len;
 }
 
 
@@ -433,46 +551,6 @@ int hex2str(void *pHex, int hexSize, char *pBuf, int bufSize)
 }
 
 /**
- * Convert HEX to DEC.
- * @param [in]  ch  HEX character (0 ~ F).
- * @returns  Integer 0 ~ 15.
- */
-static unsigned char _hex2dec(char ch)
-{
-    unsigned char val = 0;
-
-    switch ( ch )
-    {
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-            val = (ch - '0');
-            break;
-        case 'a': case 'A':
-            val = 10;
-            break;
-        case 'b': case 'B':
-            val = 11;
-            break;
-        case 'c': case 'C':
-            val = 12;
-            break;
-        case 'd': case 'D':
-            val = 13;
-            break;
-        case 'e': case 'E':
-            val = 14;
-            break;
-        case 'f': case 'F':
-            val = 15;
-            break;
-        default:
-            ;
-    }
-
-    return val;
-}
-
-/**
  * Convert HEX string to byte array.
  * @param [in]   pStr     HEX string.
  * @param [out]  pBuf     Byte array buffer.
@@ -690,17 +768,16 @@ int str2plmn(char *pStr, unsigned char *pBuf, int bufSize)
 }
 
 
-
 /**
  * Dump memory.
  * @param [in]  pDesc  Description string.
  * @param [in]  pAddr  Memory address.
  * @param [in]  size   Memory size.
  */
-void mem_dump(char *pDesc, void *pAddr, int size)
+void mem_dump(char *pDesc, void *pAddr, unsigned int size)
 {
     unsigned char *pByte = (unsigned char *)pAddr;
-    int i = 0;
+    unsigned int i = 0;
                                                                                                                              
     if (pAddr == NULL)
     {
@@ -709,7 +786,7 @@ void mem_dump(char *pDesc, void *pAddr, int size)
         return;
     }
                                                                                                                              
-    fprintf(stderr, "%s (%d bytes)\n", pDesc, size);
+    fprintf(stderr, "%s\n", pDesc);
     for (i=0; i<size; i++)
     {
         if ((i != 0) && ((i % 16) == 0))
@@ -719,6 +796,7 @@ void mem_dump(char *pDesc, void *pAddr, int size)
         fprintf(stderr, " %02X", pByte[i]);
     }
     fprintf(stderr, "\n");
+    fprintf(stderr, " (%u bytes)\n", size);
     fprintf(stderr, "\n");
 }
 

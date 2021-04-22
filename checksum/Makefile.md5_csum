@@ -1,0 +1,17 @@
+CC = gcc
+
+all: md5_csum
+
+md5_csum: md5_csum.o md5.o
+	$(CC) $^ -o $@
+
+md5_csum.o: md5_csum.c md5.h
+	$(CC) -Wall -c $<
+
+md5.o: md5.c md5.h
+	$(CC) -Wall -c $<
+
+clean:
+	rm -f md5_csum *.o
+
+.PHONY: all clean

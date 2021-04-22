@@ -3,21 +3,63 @@
 #include <string.h>
 #include <unistd.h>
 
+void size_with_unit(unsigned long long valueL)
+{
+    double valueF;
+
+    if (valueL > 0x400)
+    {
+        valueF = (((double)valueL) / 1024);
+        if (valueL % 0x400)
+        {
+            printf("= %lf[1;35mK[0m\n", valueF);
+        }
+        else
+        {
+            printf("= %.lf[1;35mK[0m\n", valueF);
+        }
+    }
+    if (valueL > 0x100000)
+    {
+        valueF = (((double)valueL) / 1048576);
+        if (valueL % 0x100000)
+        {
+            printf("= %lf[1;35mM[0m\n", valueF);
+        }
+        else
+        {
+            printf("= %.lf[1;35mM[0m\n", valueF);
+        }
+    }
+    if (valueL > 0x40000000)
+    {
+        valueF = (((double)valueL) / 1073741824);
+        if (valueL % 0x40000000)
+        {
+            printf("= %lf[1;35mG[0m\n", valueF);
+        }
+        else
+        {
+            printf("= %.lf[1;35mG[0m\n", valueF);
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     unsigned long long valueL;
     double valueF;
-    unsigned int unit;
+    unsigned int unit[2];
     int floating = 0;
     int i;
 
     if (argc < 2)
     {
         printf(
-            "Usage: memsize SiZE_in_DEC[[1;33mG[0m|[1;33mM[0m|[1;33mK[0m]\n"
+            "Usage: memsize SIZE_in_DEC[[1;35mG[0m|[1;35mM[0m|[1;35mK[0m]\n"
         );
         printf(
-            "     : memsize SiZE_in_HEX\n\n"
+            "     : memsize SIZE_in_HEX\n\n"
         );
         return 0;
     }
@@ -28,42 +70,7 @@ int main(int argc, char *argv[])
 
         printf("  %s\n", argv[1]);
         printf("= %llu\n", valueL);
-        if (valueL > 0x400)
-        {
-            valueF = (((double)valueL) / 1024);
-            if (valueL % 0x400)
-            {
-                printf("= %lf[1;33mK[0m\n", valueF);
-            }
-            else
-            {
-                printf("= %.lf[1;33mK[0m\n", valueF);
-            }
-        }
-        if (valueL > 0x100000)
-        {
-            valueF = (((double)valueL) / 1048576);
-            if (valueL % 0x100000)
-            {
-                printf("= %lf[1;33mM[0m\n", valueF);
-            }
-            else
-            {
-                printf("= %.lf[1;33mM[0m\n", valueF);
-            }
-        }
-        if (valueL > 0x40000000)
-        {
-            valueF = (((double)valueL) / 1073741824);
-            if (valueL % 0x40000000)
-            {
-                printf("= %lf[1;33mG[0m\n", valueF);
-            }
-            else
-            {
-                printf("= %.lf[1;33mG[0m\n", valueF);
-            }
-        }
+        size_with_unit( valueL );
         printf("\n");
     }
     else
@@ -77,67 +84,54 @@ int main(int argc, char *argv[])
             }
         }
 
+        switch ( argv[1][strlen(argv[1]) - 1] )
+        {
+            case 'k': case 'K':
+                argv[1][strlen(argv[1]) - 1] = 0x00;
+                printf("  %s[1;35mK[0m\n", argv[1]);
+                unit[0] = 10;
+                unit[1] = 1024;
+                break;
+            case 'm': case 'M':
+                argv[1][strlen(argv[1]) - 1] = 0x00;
+                printf("  %s[1;35mM[0m\n", argv[1]);
+                unit[0] = 20;
+                unit[1] = 1048576;
+                break;
+            case 'g': case 'G':
+                argv[1][strlen(argv[1]) - 1] = 0x00;
+                printf("  %s[1;35mG[0m\n", argv[1]);
+                unit[0] = 30;
+                unit[1] = 1073741824;
+                break;
+            default:
+                printf("  %s\n", argv[1]);
+                unit[0] = 0;
+                unit[1] = 1;
+        }
+
         if ( floating )
         {
-            switch ( argv[1][strlen(argv[1]) - 1] )
-            {
-                case 'k': case 'K':
-                    argv[1][strlen(argv[1]) - 1] = 0x00;
-                    printf("  %s[1;33mK[0m\n", argv[1]);
-                    unit = 1024;
-                    break;
-                case 'm': case 'M':
-                    argv[1][strlen(argv[1]) - 1] = 0x00;
-                    printf("  %s[1;33mM[0m\n", argv[1]);
-                    unit = 1048576;
-                    break;
-                case 'g': case 'G':
-                    argv[1][strlen(argv[1]) - 1] = 0x00;
-                    printf("  %s[1;33mG[0m\n", argv[1]);
-                    unit = 1073741824;
-                    break;
-                default:
-                    printf("  %s\n", argv[1]);
-                    unit = 1;
-            }
-
             valueF = (double)atof( argv[1] );
-            valueF *= unit;
+            valueF *= unit[1];
             valueL = (unsigned long long)valueF;
         }
         else
         {
-            switch ( argv[1][strlen(argv[1]) - 1] )
-            {
-                case 'k': case 'K':
-                    argv[1][strlen(argv[1]) - 1] = 0x00;
-                    printf("  %s[1;33mK[0m\n", argv[1]);
-                    unit = 10;
-                    break;
-                case 'm': case 'M':
-                    argv[1][strlen(argv[1]) - 1] = 0x00;
-                    printf("  %s[1;33mM[0m\n", argv[1]);
-                    unit = 20;
-                    break;
-                case 'g': case 'G':
-                    argv[1][strlen(argv[1]) - 1] = 0x00;
-                    printf("  %s[1;33mG[0m\n", argv[1]);
-                    unit = 30;
-                    break;
-                default:
-                    printf("  %s\n", argv[1]);
-                    unit = 0;
-            }
-
             valueL = atoll( argv[1] );
-            valueL <<= unit;
+            valueL <<= unit[0];
         }
 
-        if (unit > 1)
+        if (unit[0] > 0)
         {
             printf("= %llu\n", valueL);
         }
-        printf("= 0x%llX\n\n", valueL);
+        else
+        {
+            size_with_unit( valueL );
+        }
+        printf("= 0x%llX\n", valueL);
+        printf("\n");
     }
 
     return 0;

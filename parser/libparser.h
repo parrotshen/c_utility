@@ -83,6 +83,19 @@ int parse_string_into_token(char *pString, tParseTokenCb pParseFunc);
  */
 int parse_file_into_line(char *pFileName, tParseLineCb pParseFunc);
 
+/**
+ * Parse a HEX string file to byte array.
+ * @param [in]   pFileName  Input file name.
+ * @param [out]  pBuf       Byte array buffer.
+ * @param [in]   bufSize    Byte array buffer size.
+ * @returns  Data length.
+ */
+unsigned int parse_hex_string_file(
+    char          *pFileName,
+    unsigned char *pBuf,
+    unsigned int   bufSize
+);
+
 
 /**
  * Convert IP address data to string.
@@ -150,7 +163,7 @@ int str2plmn(char *pStr, unsigned char *pBuf, int bufSize);
  * @param [in]  pAddr  Memory address.
  * @param [in]  size   Memory size.
  */
-void mem_dump(char *pDesc, void *pAddr, int size);
+void mem_dump(char *pDesc, void *pAddr, unsigned int size);
 
 
 #endif

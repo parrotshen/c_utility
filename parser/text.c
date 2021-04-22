@@ -3,6 +3,9 @@
 
 int display_token(char *pStr, int len, int count)
 {
+    #if 0
+    printf("%d  ", count);
+    #endif
     printf("%s\n", pStr);
 
     return PARSE_CONTINUE;

@@ -1,0 +1,17 @@
+CC = gcc
+
+all: crc32_csum
+
+crc32_csum: crc32_csum.o crc32.o
+	$(CC) $^ -o $@
+
+crc32_csum.o: crc32_csum.c crc32.h
+	$(CC) -Wall -c $<
+
+crc32.o: crc32.c crc32.h
+	$(CC) -Wall -c $<
+
+clean:
+	rm -f crc32_csum *.o
+
+.PHONY: all clean
