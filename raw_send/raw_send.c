@@ -72,62 +72,61 @@ static int           _ifIndex = 0;
 //    Functions
 // /////////////////////////////////////////////////////////////////////////////
 
-void mem_dump(char *name, const void *addr, unsigned int len)
+void mem_dump(char *pName, void *pAddr, unsigned int len)
 {
-    unsigned char *p = (unsigned char *)addr;
+    unsigned char *pByte = pAddr;
     unsigned int   i;
 
-    if (p == NULL)
+    if (pByte == NULL)
     {
-        printf("%s (NULL)\n", name);
+        printf("%s (NULL)\n", pName);
         printf("\n");
         return;
     }
 
-    printf("%s (%u bytes)\n", name, len);
+    printf("%s (%u bytes)\n", pName, len);
     for(i=0; i<len; i++)
     {
         if ((i != 0) && ((i % 16) == 0))
         {
             printf("\n");
         }
-        printf(" %02X", p[i]);
+        printf(" %02X", pByte[i]);
     }
-    printf("\n");
-    printf("\n");
+    printf("\n\n");
 }
 
-char *get_token(char *line, char *token, int tsize)
+char *get_token(char *pString, char *pToken, int tsize)
 {
-    char *pt = token;  /* pointer to token */
-    char *pl = line;   /* pointer to line  */
-    int   i  = 0;
+    char *pBuf = pToken;    /* pointer to token */
+    char *pNext = pString;  /* pointer to line  */
+    int   i = 0;
 
-    if (0x0 == line[0])
+    if (0x0 == pString[0])
     {
         /* This is a NULL line */
-        token[0] = 0x0;
+        pToken[0] = 0x0;
         return NULL;
     }
 
     /* Pass space and tab character */
-    for (; *pl && IS_SPACE(*pl); pl++);
+    for (; *pNext && IS_SPACE(*pNext); pNext++);
 
     /* Get the separation token */
-    for (; *pl && !IS_SPACE(*pl) && i<tsize; pl++, i++)
+    for (; *pNext && !IS_SPACE(*pNext) && i<tsize; pNext++, i++)
     {
-        *pt++ = *pl;
+        *pBuf++ = *pNext;
     }
-    *pt = 0x0;
+    *pBuf = 0x0;
 
-    return pl;
+    return pNext;
 }
 
-int read_line(FILE *fp, char *line, int lsize)
+int read_line(FILE *pFile, char *pLine, int lsize)
 {
-    line[0] = 0x0;
+    pLine[0] = 0x0;
 
-    if ( feof(fp) )
+    if ( feof(pFile) )
     {
         return 0;
     }
@@ -137,46 +136,46 @@ int read_line(FILE *fp, char *line, int lsize)
     /*     int   n,      // length to read            */
     /*     FILE *stream  // FILE pointer              */
     /* );                                             */
-    fgets(line, lsize, fp);
+    fgets(pLine, lsize, pFile);
 
     /* remove the CR/LF character */
-    if ((strlen(line) > 0) && (line[strlen(line)-1] == 0x0a))
+    if ((strlen(pLine) > 0) && (pLine[strlen(pLine)-1] == 0x0a))
     {
-        line[strlen(line)-1] = 0x0;
+        pLine[strlen(pLine)-1] = 0x0;
     }
-    if ((strlen(line) > 0) && (line[strlen(line)-1] == 0x0d))
+    if ((strlen(pLine) > 0) && (pLine[strlen(pLine)-1] == 0x0d))
     {
-        line[strlen(line)-1] = 0x0;
+        pLine[strlen(pLine)-1] = 0x0;
     }
 
     return 1;
 }
 
-int read_file(char *filename, unsigned char *buffer, int bsize)
+int read_file(char *pFileName, unsigned char *pBuf, int bsize)
 {
-    unsigned char *byte = buffer;
+    unsigned char *pByte = pBuf;
     int   count = 0;
 
-    FILE *fp = NULL;
+    FILE *pInput = NULL;
     char  line[LINE_SIZE+1];
     char  token[TOKEN_SIZE+1];
-    char *next;
+    char *pNext;
     int   i;
 
-    if ((fp=fopen(filename, "r")) == NULL)
+    if ((pInput=fopen(pFileName, "r")) == NULL)
     {
-        printf("ERR: cannot open file '%s'\n", filename);
+        printf("ERR: cannot open file '%s'\n", pFileName);
         return 0;
     }
 
     /* start reading input file */
-    while ( read_line(fp, line, LINE_SIZE) )
+    while ( read_line(pInput, line, LINE_SIZE) )
     {
-        next = line;
+        pNext = line;
 
         do
         {
-            next = get_token(next, token, TOKEN_SIZE);
+            pNext = get_token(pNext, token, TOKEN_SIZE);
             if ((0x0 == token[0]) || ('#' == token[0]))
             {
                 /* ignore the comment and null line */
@@ -191,13 +190,13 @@ int read_file(char *filename, unsigned char *buffer, int bsize)
                 goto _EXIT_READ_FILE;
             }
 
-            *byte++ = (i & 0xFF);
+            *pByte++ = (i & 0xFF);
             count++;
-        } while ( next );
+        } while ( pNext );
     }
 
 _EXIT_READ_FILE:
-    fclose( fp );
+    fclose( pInput );
     return count;
 }
 

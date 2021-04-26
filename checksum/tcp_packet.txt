@@ -1,0 +1,15 @@
+# Source      IP: 106.75.108.69
+# Destination IP: 192.168.2.70
+
+01 bb cc 03
+d8 ab 07 ec
+b8 af b2 2e
+50 18 7a e8
+d8 22 # Checksum
+00 00
+
+17 03 03 00 41 18 6c 8a 05 91 a4 6f 73 60 a5 6f
+74 85 f5 2a e5 8f ec 4b be ff 25 c3 dd cd 00 86
+c7 e9 13 d2 cf f6 21 99 76 62 d2 96 6f 05 23 78
+8d e4 8e 28 ed fc df b3 36 c7 2a c4 94 58 40 37
+b0 66 d7 a2 d0 08

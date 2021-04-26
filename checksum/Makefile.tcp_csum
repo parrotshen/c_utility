@@ -3,15 +3,15 @@ LIBPARSER = ../parser
 CFLAGS = -Wall -I$(LIBPARSER)
 LDFLAGS = -L$(LIBPARSER) -lparser
 
-all: ip_csum
+all: tcp_csum
 
-ip_csum: ip_csum.o onec.o
+tcp_csum: tcp_csum.o onec.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
-ip_csum.o: ip_csum.c onec.h
+tcp_csum.o: tcp_csum.c onec.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f ip_csum *.o
+	rm -f tcp_csum *.o
 
 .PHONY: all clean
