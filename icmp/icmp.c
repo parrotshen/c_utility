@@ -16,7 +16,7 @@
 //    Macro declarations
 // /////////////////////////////////////////////////////////////////////////////
 
-#define ICMP_MAX_LEN  (1023)
+#define ICMP_MAX_LEN  (1500)
 #define ICMP_HDR_LEN  sizeof(struct icmphdr)
 
 
@@ -29,8 +29,8 @@
 //    Variables declarations
 // /////////////////////////////////////////////////////////////////////////////
 
-unsigned char  g_txBuff[ICMP_MAX_LEN+1];
-unsigned char  g_rxBuff[ICMP_MAX_LEN+1];
+unsigned char  g_txBuff[ICMP_MAX_LEN];
+unsigned char  g_rxBuff[ICMP_MAX_LEN];
 int  g_sock = -1;
 int  g_debug = 0;
 
@@ -123,8 +123,8 @@ int sendICMP(char *pIpAddr, int type, int code)
     switch ( type )
     {
         case ICMP_ECHOREPLY:
-            pIcmp->icmp_id = getpid();
-            pIcmp->icmp_seq = (unsigned short)time(NULL);
+            pIcmp->icmp_id = htons( getpid() );
+            pIcmp->icmp_seq = htons( (unsigned short)time(NULL) );
             memset(pData, 0xFF, 56);
             size = (ICMP_HDR_LEN + 56);
             break;
@@ -147,8 +147,8 @@ int sendICMP(char *pIpAddr, int type, int code)
             size = (ICMP_HDR_LEN + 28);
             break;
         case ICMP_ECHO:
-            pIcmp->icmp_id = getpid();
-            pIcmp->icmp_seq = (unsigned short)time(NULL);
+            pIcmp->icmp_id = htons( getpid() );
+            pIcmp->icmp_seq = htons( (unsigned short)time(NULL) );
             memset(pData, 0xFF, 56);
             size = (ICMP_HDR_LEN + 56);
             break;
@@ -165,31 +165,31 @@ int sendICMP(char *pIpAddr, int type, int code)
             size = (ICMP_HDR_LEN + 28);
             break;
         case ICMP_TIMESTAMP:
-            pIcmp->icmp_id = getpid();
-            pIcmp->icmp_seq = (unsigned short)time(NULL);
-            pIcmp->icmp_otime = 0x11111111;
-            pIcmp->icmp_rtime = 0x22222222;
-            pIcmp->icmp_ttime = 0x33333333;
+            pIcmp->icmp_id = htons( getpid() );
+            pIcmp->icmp_seq = htons( (unsigned short)time(NULL) );
+            pIcmp->icmp_otime = htonl(0x11111111);
+            pIcmp->icmp_rtime = htonl(0x22222222);
+            pIcmp->icmp_ttime = htonl(0x33333333);
             size = (ICMP_HDR_LEN + 12);
             break;
         case ICMP_TIMESTAMPREPLY:
-            pIcmp->icmp_id = getpid();
-            pIcmp->icmp_seq = (unsigned short)time(NULL);
-            pIcmp->icmp_otime = 0x44444444;
-            pIcmp->icmp_rtime = 0x55555555;
-            pIcmp->icmp_ttime = 0x66666666;
+            pIcmp->icmp_id = htons( getpid() );
+            pIcmp->icmp_seq = htons( (unsigned short)time(NULL) );
+            pIcmp->icmp_otime = htonl(0x44444444);
+            pIcmp->icmp_rtime = htonl(0x55555555);
+            pIcmp->icmp_ttime = htonl(0x66666666);
             size = (ICMP_HDR_LEN + 12);
             break;
         case ICMP_ADDRESS:
-            pIcmp->icmp_id = getpid();
-            pIcmp->icmp_seq = (unsigned short)time(NULL);
-            pIcmp->icmp_mask = 0;
+            pIcmp->icmp_id = htons( getpid() );
+            pIcmp->icmp_seq = htons( (unsigned short)time(NULL) );
+            pIcmp->icmp_mask = htonl(0);
             size = (ICMP_HDR_LEN + 4);
             break;
         case ICMP_ADDRESSREPLY:
-            pIcmp->icmp_id = getpid();
-            pIcmp->icmp_seq = (unsigned short)time(NULL);
-            pIcmp->icmp_mask = ((255) | (255 << 8) | (255 << 16) | (0 << 24));
+            pIcmp->icmp_id = htons( getpid() );
+            pIcmp->icmp_seq = htons( (unsigned short)time(NULL) );
+            pIcmp->icmp_mask = htonl( (255) | (255 << 8) | (255 << 16) | (0 << 24) );
             size = (ICMP_HDR_LEN + 4);
             break;
         default:
@@ -335,8 +335,8 @@ void help(void)
 {
     printf("Usage: icmp [OPTION...]\n");
     printf("\n");
-    printf("  -i IP     IP address.\n");
-    printf("  -t type   ICMP type.\n");
+    printf("  -i IP     IPv4 address.\n");
+    printf("  -t TYPE   ICMP type.\n");
     printf("               0: ECHO REPLY\n");
     printf("               3: DESTINATION UNREACHABLE\n");
     printf("               4: SOURCE QUENCH\n");
@@ -348,7 +348,7 @@ void help(void)
     printf("              14: TIMESTAMP REPLY\n");
     printf("              17: ADDRESS MASK REQUEST\n");
     printf("              18: ADDRESS MASK REPLY\n");
-    printf("  -c code   ICMP code.\n");
+    printf("  -c CODE   ICMP code.\n");
     printf("  -s        Send packet only (No receive).\n");
     printf("  -d        Debug mode enable.\n");
     printf("  -h        Show the help message.\n");
@@ -403,6 +403,7 @@ int main (int argc, char *argv[])
     if (setuid( getuid() ) != 0)
     {
         perror( "setuid" );
+        close( g_sock );
         return -1;
     }
 
