@@ -18,6 +18,59 @@
 #define TOKEN_SIZE             (255)
 
 
+#define BYTES_TO_INT16(pBuf, val) \
+    do { \
+        val  = ((unsigned short)(*((unsigned char *)pBuf    )) << 8); \
+        val |= ((unsigned short)(*((unsigned char *)pBuf + 1))     ); \
+    } while (0)
+
+#define INT16_TO_BYTES(val, pBuf) \
+    do { \
+        *((unsigned char *)pBuf    ) = ((val >> 8) & 0xFF); \
+        *((unsigned char *)pBuf + 1) = ((val     ) & 0xFF); \
+    } while (0)
+
+#define BYTES_TO_INT32(pBuf, val) \
+    do { \
+        val  = ((unsigned int)(*((unsigned char *)pBuf    )) << 24); \
+        val |= ((unsigned int)(*((unsigned char *)pBuf + 1)) << 16); \
+        val |= ((unsigned int)(*((unsigned char *)pBuf + 2)) <<  8); \
+        val |= ((unsigned int)(*((unsigned char *)pBuf + 3))      ); \
+    } while (0)
+
+#define INT32_TO_BYTES(val, pBuf) \
+    do { \
+        *((unsigned char *)pBuf    ) = ((val >> 24) & 0xFF); \
+        *((unsigned char *)pBuf + 1) = ((val >> 16) & 0xFF); \
+        *((unsigned char *)pBuf + 2) = ((val >>  8) & 0xFF); \
+        *((unsigned char *)pBuf + 3) = ((val      ) & 0xFF); \
+    } while (0)
+
+#define BYTES_TO_INT64(pBuf, val) \
+    do { \
+        val  = ((unsigned long long)(*((unsigned char *)pBuf    )) << 56); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 1)) << 48); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 2)) << 40); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 3)) << 32); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 4)) << 24); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 5)) << 16); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 6)) <<  8); \
+        val |= ((unsigned long long)(*((unsigned char *)pBuf + 7))      ); \
+    } while (0)
+
+#define INT64_TO_BYTES(val, pBuf) \
+    do { \
+        *((unsigned char *)pBuf    ) = ((val >> 56) & 0xFF); \
+        *((unsigned char *)pBuf + 1) = ((val >> 48) & 0xFF); \
+        *((unsigned char *)pBuf + 2) = ((val >> 40) & 0xFF); \
+        *((unsigned char *)pBuf + 3) = ((val >> 32) & 0xFF); \
+        *((unsigned char *)pBuf + 4) = ((val >> 24) & 0xFF); \
+        *((unsigned char *)pBuf + 5) = ((val >> 16) & 0xFF); \
+        *((unsigned char *)pBuf + 6) = ((val >>  8) & 0xFF); \
+        *((unsigned char *)pBuf + 7) = ((val      ) & 0xFF); \
+    } while (0)
+
+
 // /////////////////////////////////////////////////////////////////////////////
 //    Type declarations
 // /////////////////////////////////////////////////////////////////////////////

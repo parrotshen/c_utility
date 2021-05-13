@@ -310,7 +310,7 @@ _EXIT_PARSE:
  */
 int ip2str(int ver, void *pAddr, char *pBuf, int bufSize)
 {
-    unsigned char *pIp = (unsigned char *)pAddr;
+    unsigned char *pIp = pAddr;
     int retval = 0;
 
     pBuf[0] = 0x00;
@@ -333,22 +333,14 @@ int ip2str(int ver, void *pAddr, char *pBuf, int bufSize)
                      pBuf,
                      bufSize,
                      "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X",
-                     pIp[0],
-                     pIp[1],
-                     pIp[2],
-                     pIp[3],
-                     pIp[4],
-                     pIp[5],
-                     pIp[6],
-                     pIp[7],
-                     pIp[8],
-                     pIp[9],
-                     pIp[10],
-                     pIp[11],
-                     pIp[12],
-                     pIp[13],
-                     pIp[14],
-                     pIp[15]
+                     pIp[0], pIp[1],
+                     pIp[2], pIp[3],
+                     pIp[4], pIp[5],
+                     pIp[6], pIp[7],
+                     pIp[8], pIp[9],
+                     pIp[10], pIp[11],
+                     pIp[12], pIp[13],
+                     pIp[14], pIp[15]
                  );
     }
 
@@ -478,7 +470,7 @@ static int _parseIpv6Str(const char *src, unsigned char *dst)
  */
 int str2ip(int ver, char *pStr, void *pAddr)
 {
-    unsigned char *pIp = (unsigned char *)pAddr;
+    unsigned char *pIp = pAddr;
     int  buf[16] = {0};
     int  retval = 0;
 
@@ -776,16 +768,16 @@ int str2plmn(char *pStr, unsigned char *pBuf, int bufSize)
  */
 void mem_dump(char *pDesc, void *pAddr, unsigned int size)
 {
-    unsigned char *pByte = (unsigned char *)pAddr;
+    unsigned char *pByte = pAddr;
     unsigned int i = 0;
-                                                                                                                             
+
     if (pAddr == NULL)
     {
         fprintf(stderr, "%s (NULL)\n", pDesc);
         fprintf(stderr, "\n");
         return;
     }
-                                                                                                                             
+
     fprintf(stderr, "%s\n", pDesc);
     for (i=0; i<size; i++)
     {
