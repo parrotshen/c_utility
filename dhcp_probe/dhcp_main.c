@@ -38,6 +38,49 @@ struct client_config_t client_config = {
 //    Functions
 // /////////////////////////////////////////////////////////////////////////////
 
+/* Lookup MAC address */
+char *find_arp(uint8 *ip)
+{
+    static char  line[256];
+    char  pattern[20];
+    FILE *fp = NULL;
+    char *token;
+
+    sprintf(pattern, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+
+    if ((fp=fopen("/proc/net/arp", "r")) == NULL)
+    {
+        LOG_ERRO("cannot open /proc/net/arp\n");
+        return NULL;
+    }
+
+    while ( !feof( fp ) )
+    {
+        fgets(line, 255, fp);
+        if ( line[0] )
+        {
+            token = strtok(line, " \t");
+            if ((token != NULL) && (0 == strcmp(token, pattern)))
+            {
+                while ( token )
+                {
+                    if ((strlen(token) >= 17) && (':' == token[2]))
+                    {
+                        /* found */
+                        fclose( fp );
+                        return token;
+                    }
+                    token = strtok(NULL, " \t");
+                }
+            }
+        }
+    }
+
+    fclose( fp );
+
+    return NULL;
+}
+
 /* Create a random xid */
 uint32 random_xid(void)
 {
@@ -414,6 +457,7 @@ int main(int argc, char *argv[])
                     if (*message == DHCPOFFER)
                     {
                         uint8  *option;
+                        char   *server_mac;
                         uint32  server_ip;
 
                         xid   = packet.xid;
@@ -424,13 +468,29 @@ int main(int argc, char *argv[])
                         {
                             BYTE_ARRAY_TO_UINT32(option, server_ip);
 
-                            LOG_INFO(
-                                "server IP: %u.%u.%u.%u\n",
-                                ((server_ip >> 24) & 0xFF),
-                                ((server_ip >> 16) & 0xFF),
-                                ((server_ip >>  8) & 0xFF),
-                                ((server_ip      ) & 0xFF)
-                            );
+                            server_mac = find_arp( option );
+
+                            if ( server_mac )
+                            {
+                                LOG_INFO(
+                                    "server IP: %u.%u.%u.%u (%s)\n",
+                                    ((server_ip >> 24) & 0xFF),
+                                    ((server_ip >> 16) & 0xFF),
+                                    ((server_ip >>  8) & 0xFF),
+                                    ((server_ip      ) & 0xFF),
+                                    server_mac
+                                );
+                            }
+                            else
+                            {
+                                LOG_INFO(
+                                    "server IP: %u.%u.%u.%u\n",
+                                    ((server_ip >> 24) & 0xFF),
+                                    ((server_ip >> 16) & 0xFF),
+                                    ((server_ip >>  8) & 0xFF),
+                                    ((server_ip      ) & 0xFF)
+                                );
+                            }
                         }
                         else
                         {
