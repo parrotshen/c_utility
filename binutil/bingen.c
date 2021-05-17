@@ -3,17 +3,31 @@
 #include <unistd.h>
 #include "utility.h"
 
+unsigned int generate_bytes(FILE *pFile, char *pHexStr)
+{
+    void *pData;
+    unsigned int  bytes;
+
+    pData = hexstr2byte(pHexStr, &bytes);
+    if ( pData )
+    {
+        if (bytes > 0)
+        {
+            fwrite(pData, bytes, 1, pFile);
+        }
+        free( pData );
+    }
+
+    return bytes;
+}
 
 int main(int argc, char *argv[])
 {
+    static char  text[1024];
     FILE *pFileIn  = NULL;
     FILE *pFileOut = NULL;
     long  sizeIn;
     long  sizeOut;
-    char  text[1024];
-
-    void *pData;
-    unsigned int  bytes;
     long  i;
     long  j;
 
@@ -28,14 +42,14 @@ int main(int argc, char *argv[])
     pFileIn = fopen(argv[1], "r");
     if (NULL == pFileIn)
     {
-        printf("ERR: cannot open file %s\n", argv[1]);
+        printf("ERR: cannot open %s\n", argv[1]);
         return 0;
     }
 
     pFileOut = fopen(argv[2], "w");
     if (NULL == pFileOut)
     {
-        printf("ERR: cannot open file %s\n", argv[2]);
+        printf("ERR: cannot open %s\n", argv[2]);
         fclose( pFileIn );
         return 0;
     }
@@ -53,38 +67,27 @@ int main(int argc, char *argv[])
 
             if ( text[0] )
             {
-                pData = hexstr2byte(text, &bytes);
-                if ( pData )
-                {
-                    if (bytes > 0)
-                    {
-                        fwrite(pData, bytes, 1, pFileOut);
-                        sizeOut += bytes;
-                    }
-
-                    free( pData );
-                }
+                sizeOut += generate_bytes(pFileOut, text);
             }
         }
         else
         {
             j++;
         }
+
+        if (j >= 1023)
+        {
+            text[j] = '\0';
+            j = 0;
+            sizeOut += generate_bytes(pFileOut, text);
+        }
     }
 
     if ((j > 0) && ( text[j-1] ))
     {
-        pData = hexstr2byte(text, &bytes);
-        if ( pData )
-        {
-            if (bytes > 0)
-            {
-                fwrite(pData, bytes, 1, pFileOut);
-                sizeOut += bytes;
-            }
-
-            free( pData );
-        }
+        text[j] = '\0';
+        j = 0;
+        sizeOut += generate_bytes(pFileOut, text);
     }
 
     fclose( pFileIn  );

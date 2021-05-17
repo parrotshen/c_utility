@@ -16,9 +16,9 @@ long filesize(char *pName)
     return 0;
 }
 
-void dump(const void *pAddr, unsigned int size)
+void dump(void *pAddr, unsigned int size)
 {
-    unsigned char *pByte = (unsigned char *)pAddr;
+    unsigned char *pByte = pAddr;
     unsigned int  i;
 
     if (pAddr == NULL)
@@ -64,18 +64,22 @@ unsigned char *hexstr2byte(char *pStr, unsigned int *pLen)
 
             switch ( ch )
             {
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
+                case '0' ... '9':
                     val1 = (ch - '0');
                     break;
-                case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+                case 'a' ... 'f':
                     val1 = (((ch - 'a')) + 10);
                     break;
-                case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+                case 'A' ... 'F':
                     val1 = (((ch - 'A')) + 10);
                     break;
                 case 0x20:
+                case '\t':
                     ignore = 1;
+                    break;
+                case '#':
+                    /* '#' is the begin of comments */
+                    goto _EXIT;
                     break;
                 default:
                     printf("incorrect HEX string '%c'\n", ch);
@@ -103,6 +107,7 @@ unsigned char *hexstr2byte(char *pStr, unsigned int *pLen)
             i++;
         }
 
+_EXIT:
         if ((j % 2) != 0)
         {
             printf("Hex string is not byte-aligned\n");

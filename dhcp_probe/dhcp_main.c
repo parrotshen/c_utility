@@ -42,11 +42,11 @@ struct client_config_t client_config = {
 char *find_arp(uint8 *ip)
 {
     static char  line[256];
-    char  pattern[20];
+    char  target[20];
     FILE *fp = NULL;
     char *token;
 
-    sprintf(pattern, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+    sprintf(target, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 
     if ((fp=fopen("/proc/net/arp", "r")) == NULL)
     {
@@ -60,9 +60,9 @@ char *find_arp(uint8 *ip)
         if ( line[0] )
         {
             token = strtok(line, " \t");
-            if ((token != NULL) && (0 == strcmp(token, pattern)))
+            if ((token != NULL) && (0 == strcmp(token, target)))
             {
-                while ( token )
+                do
                 {
                     if ((strlen(token) >= 17) && (':' == token[2]))
                     {
@@ -71,7 +71,7 @@ char *find_arp(uint8 *ip)
                         return token;
                     }
                     token = strtok(NULL, " \t");
-                }
+                } while ( token );
             }
         }
     }
