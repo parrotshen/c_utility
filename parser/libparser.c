@@ -97,36 +97,34 @@ char *bypass_token(int num, char *pString)
  */
 char *parse_token(char *pString, char *pToken, int tsize)
 {
-    char *pBuf  = pToken;   /* pointer to token */
-    char *pNext = pString;  /* pointer to line  */
-    int   i = 0;
+    int i = 0;
 
     if (0x0 == pString[0])
     {
         /* This is a NULL line */
-        pBuf[0] = 0x0;
+        pToken[0] = 0x0;
         return NULL;
     }
 
-    /* Pass space and tab character */
-    for (; *pNext && IS_SPACE(*pNext); pNext++);
+    /* Bypass space and tab characters */
+    for (; *pString && IS_SPACE(*pString); pString++);
 
-    /* Get the separation token */
-    for (; *pNext && !IS_SPACE(*pNext) && i<tsize; pNext++, i++)
+    /* Pull out a token */
+    for (; *pString && !IS_SPACE(*pString) && i<tsize; pString++, i++)
     {
-        *pBuf++ = *pNext;
+        *pToken++ = *pString;
     }
-    *pBuf = 0x0;
+    *pToken = 0x0;
 
-    return pNext;
+    return pString;
 }
 
 /**
  * Read one line from a text file.
  * @param [in]   pFile  Input file pointer.
- * @param [out]  pLine  Output line string.
+ * @param [out]  pLine  Output buffer.
  * @param [in]   lsize  Output buffer size.
- * @returns  Success(1) or failure(0).
+ * @returns  Success(line length) or failure(-1).
  */
 int parse_line(FILE *pFile, char *pLine, int lsize)
 {
@@ -134,7 +132,8 @@ int parse_line(FILE *pFile, char *pLine, int lsize)
 
     if ( feof(pFile) )
     {
-        return 0;
+        /* end of file */
+        return -1;
     }
 
     /* char *fgets(                                   */
@@ -154,7 +153,7 @@ int parse_line(FILE *pFile, char *pLine, int lsize)
         pLine[strlen(pLine)-1] = 0x0;
     }
 
-    return 1;
+    return strlen(pLine);
 }
 
 /**
@@ -211,7 +210,7 @@ int parse_file_into_line(char *pFileName, tParseLineCb pParseFunc)
     }
 
     /* start reading input file */
-    while ( parse_line(pInput, line, LINE_SIZE) )
+    while (parse_line(pInput, line, LINE_SIZE) >= 0)
     {
         action = pParseFunc(line, strlen( line ), count);
         count++;
@@ -245,6 +244,7 @@ unsigned int parse_hex_string_file(
     unsigned char  nibbleH;
     unsigned char  nibbleL;
     unsigned int   len;
+    int  more;
 
 
     if ((pInput=fopen(pFileName, "r")) == NULL)
@@ -255,43 +255,45 @@ unsigned int parse_hex_string_file(
 
     /* start reading input file */
     len = 0;
-    while ( parse_line(pInput, line, LINE_SIZE) )
+    do
     {
-        pNext = line;
-
-        do
+        if ((more=parse_line(pInput, line, LINE_SIZE)) > 0)
         {
-            pNext = parse_token(pNext, token, TOKEN_SIZE);
-            if ((0x0 == token[0]) || ('#' == token[0]))
+            pNext = line;
+            do
             {
-                /* ignore the null or comment line */
-                break;
-            }
+                pNext = parse_token(pNext, token, TOKEN_SIZE);
+                if ((0x0 == token[0]) || ('#' == token[0]))
+                {
+                    /* ignore the null or comment line */
+                    break;
+                }
 
-            if (len >= bufSize)
-            {
-                printf("%s: un-enough buffer size (%u)\n", __func__, bufSize);
-                goto _EXIT_PARSE;
-            }
+                if (len >= bufSize)
+                {
+                    printf("%s: un-enough buffer size (%u)\n", __func__, bufSize);
+                    goto _EXIT_PARSE;
+                }
 
-            if (strlen( token ) > 2)
-            {
-                printf("%s: wrong HEX token (%s)\n", __func__, token);
-                goto _EXIT_PARSE;
-            }
-            else if (strlen( token ) > 1)
-            {
-                nibbleH = _hex2dec( token[0] );
-                nibbleL = _hex2dec( token[1] );
+                if (strlen( token ) > 2)
+                {
+                    printf("%s: wrong HEX token (%s)\n", __func__, token);
+                    goto _EXIT_PARSE;
+                }
+                else if (strlen( token ) > 1)
+                {
+                    nibbleH = _hex2dec( token[0] );
+                    nibbleL = _hex2dec( token[1] );
 
-                pBuf[len++] = ((nibbleH << 4) | (nibbleL));
-            }
-            else
-            {
-                pBuf[len++] = _hex2dec( token[0] );
-            }
-        } while ( pNext );
-    }
+                    pBuf[len++] = ((nibbleH << 4) | (nibbleL));
+                }
+                else
+                {
+                    pBuf[len++] = _hex2dec( token[0] );
+                }
+            } while ( pNext );
+        }
+    } while (more != -1);
 
 _EXIT_PARSE:
     fclose( pInput );

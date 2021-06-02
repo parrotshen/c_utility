@@ -114,9 +114,9 @@ char *parse_token(char *pString, char *pToken, int tsize);
 /**
  * Read one line from a text file.
  * @param [in]   pFile  Input file pointer.
- * @param [out]  pLine  Output line string.
+ * @param [out]  pLine  Output buffer.
  * @param [in]   lsize  Output buffer size.
- * @returns  Success(1) or failure(0).
+ * @returns  Success(line length) or failure(-1).
  */
 int parse_line(FILE *pFile, char *pLine, int lsize);
 
