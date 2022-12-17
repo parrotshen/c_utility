@@ -1,14 +1,13 @@
 CC = gcc
-LIBPARSER = ../parser
-CFLAGS = -Wall -I$(LIBPARSER)
-LDFLAGS = -L$(LIBPARSER) -lparser
+CFLAGS = -Wall
+LDFLAGS = 
 
 all: tcp_csum
 
-tcp_csum: tcp_csum.o onec.o
+tcp_csum: tcp_csum.o onec.o parser.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
-tcp_csum.o: tcp_csum.c onec.h
+tcp_csum.o: tcp_csum.c onec.h parser.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:

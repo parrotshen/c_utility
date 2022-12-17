@@ -1,14 +1,13 @@
 CC = gcc
-LIBPARSER = ../parser
-CFLAGS = -Wall -I$(LIBPARSER)
-LDFLAGS = -L$(LIBPARSER) -lparser
+CFLAGS = -Wall
+LDFLAGS = 
 
 all: icmp_csum
 
-icmp_csum: icmp_csum.o onec.o
+icmp_csum: icmp_csum.o onec.o parser.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
-icmp_csum.o: icmp_csum.c onec.h
+icmp_csum.o: icmp_csum.c onec.h parser.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
