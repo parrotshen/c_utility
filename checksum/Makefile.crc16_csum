@@ -1,0 +1,17 @@
+CC = gcc
+
+all: crc16_csum
+
+crc16_csum: crc16_csum.o crc16.o
+	$(CC) $^ -o $@
+
+crc16_csum.o: crc16_csum.c crc16.h
+	$(CC) -Wall -c $<
+
+crc16.o: crc16.c crc16.h
+	$(CC) -Wall -c $<
+
+clean:
+	rm -f crc16_csum *.o
+
+.PHONY: all clean

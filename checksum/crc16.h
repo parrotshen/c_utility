@@ -1,5 +1,5 @@
-#ifndef __CRC32_H__
-#define __CRC32_H__
+#ifndef __CRC16_H__
+#define __CRC16_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +15,15 @@ typedef signed short    int16;
 typedef signed int      int32;
 
 
-uint32 crc32(uint32 crc, void *pBuf, size_t size);
+uint16 crc16(
+    uint16  poly,
+    uint16  init,
+    int     refin,
+    int     refout,
+    uint16  xout,
+    void   *pData,
+    size_t  size
+);
 
 
 #endif

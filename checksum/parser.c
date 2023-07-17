@@ -251,7 +251,7 @@ static int _parseIpv6Str(const char *src, unsigned char *dst)
     static const char xdigits_l[] = "0123456789abcdef",
                       xdigits_u[] = "0123456789ABCDEF";
     unsigned char tmp[NS_IN6ADDRSZ], *tp, *endp, *colonp;
-    const char *xdigits, *curtok;
+    const char *xdigits;
     int ch, seen_xdigits;
     int val;
 
@@ -268,7 +268,6 @@ static int _parseIpv6Str(const char *src, unsigned char *dst)
         }
     }
 
-    curtok = src;
     seen_xdigits = 0;
     val = 0;
     while ((ch = *src++) != '\0')
@@ -291,7 +290,6 @@ static int _parseIpv6Str(const char *src, unsigned char *dst)
         }
         if (ch == ':')
         {
-            curtok = src;
             if (!seen_xdigits)
             {
                 if (colonp)

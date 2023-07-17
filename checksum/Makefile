@@ -1,4 +1,4 @@
-APPS = crc32_csum md5_csum ip_csum tcp_csum udp_csum icmp_csum
+APPS = crc16_csum crc32_csum md5_csum ip_csum tcp_csum udp_csum icmp_csum
 
 all:
 	@gcc -Wall -c onec.c
