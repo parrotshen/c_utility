@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
     do
     {
         if (process_monitor(pid, interval) != 0) break;
-        if (++count == loops) break;
+        if ((loop > 0) && (++count == loops)) break;
     } while ( g_running );
 
     return 0;
