@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 
     unsigned char *pPattern;
     unsigned int   patternLen;
+    int  matched = 0;
     int  next;
     int  count;
     int  i;
@@ -46,21 +47,34 @@ int main(int argc, char *argv[])
             count = 1;
             for (i=0; i<totalLen; i++)
             {
-                fread(&byte, 1, 1, pFileIn);
+                if (fread(&byte, 1, 1, pFileIn) != 1) break;
 
                 if (byte == pPattern[next])
                 {
-                    if (next == 0) offset = i;
-
+                    //printf("%02x, %02x, %d\n", i, byte, next);
+                    if (next == 0)
+                    {
+                        matched = 1;
+                        offset = i;
+                    }
+                    
                     next++;
                     if (next == patternLen)
                     {
+                        matched = 0;
                         printf("#%d found at 0x%X\n", count, offset);
+                        next = 0;
                         count++;
                     }
                 }
                 else
                 {
+                    if ( matched )
+                    {
+                        matched = 0;
+                        i = offset;
+                        fseek(pFileIn, (i + 1), SEEK_SET);
+                    }
                     next = 0;
                 }
             }
