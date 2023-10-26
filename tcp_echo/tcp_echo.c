@@ -13,8 +13,8 @@
 // /////////////////////////////////////////////////////////////////////////////
 
 #define MAX_BUFFER_SIZE (2047)
-#define MAX_SOCKET_NUM  (8)
-#define MAX_CLIENT_NUM  (4)
+#define MAX_CLIENT_NUM  (10)
+#define MAX_SOCKET_NUM  (MAX_CLIENT_NUM + 4)
 
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -41,6 +41,8 @@ typedef struct _tSocket
  * [5] client socket #2
  * [6] client socket #3
  * [7] client socket #4
+ * ...
+ * [13] client socket #10
  */
 tSocket g_socket[MAX_SOCKET_NUM];
 
@@ -174,7 +176,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    if (listen(fd_server, MAX_CLIENT_NUM) < 0)
+    if (listen(fd_server, MAX_SOCKET_NUM) < 0)
     {
         perror( "listen" );
         close( fd_server );
