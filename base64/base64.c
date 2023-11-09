@@ -240,29 +240,18 @@ int b64(int opt, char *infilename, char *outfilename, int linesize)
 *
 * display usage information, help, version info
 */
-void showuse(int morehelp)
+void showuse(void)
 {
-    {
-        printf( "\n" );
-        printf( "  base64   (Base64 Encode/Decode)      Bob Trower 08/03/01\n" );
-        printf( "           (C) Copr Bob Trower 1986-01.      Version 0.00B\n" );
-        printf( "  Usage:   base64 -option [-l num] [<FileIn> [<FileOut>]]\n" );
-    }
-    if ( !morehelp )
-    {
-        printf( "\n" );
-        printf( "           Use -h option for additional help.\n" );
-        printf( "\n" );
-    }
-    else
-    {
-        printf( "  Options: -e  encode to Base64\n" );
-        printf( "           -d  decode from Base64\n" );
-        printf( "  Note:    -l  use to change line size (from 76 characters)\n" );
-        printf( "\n" );
-        printf( "  Returns: 0 = success, non-zero is an error code.\n" );
-        printf( "  ErrCode: 1 = Bad Syntax, 2 = File Open, 3 = File I/O\n" );
-    }
+    printf( "  base64   (Base64 Encode/Decode)      Bob Trower 08/03/01\n" );
+    printf( "           (C) Copr Bob Trower 1986-01.      Version 0.00B\n" );
+    printf( "  Usage:   base64 -option [-l num] [<FileIn> [<FileOut>]]\n" );
+    printf( "\n" );
+    printf( "  Options: -e  encode to Base64\n" );
+    printf( "           -d  decode from Base64\n" );
+    printf( "  Note:    -l  use to change line size (from 76 characters)\n" );
+    printf( "\n" );
+    printf( "  Returns: 0 = success, non-zero is an error code.\n" );
+    printf( "  ErrCode: 1 = Bad Syntax, 2 = File Open, 3 = File I/O\n" );
 }
 
 /*
@@ -278,6 +267,12 @@ int main(int argc, char **argv)
     int status = 0;
     int opt = 0;
 
+    if (1 == argc)
+    {
+        showuse();
+        return status;
+    }
+    
     while ( THIS_OPT(argc, argv) )
     {
         switch ( THIS_OPT(argc, argv) )
@@ -317,7 +312,7 @@ int main(int argc, char **argv)
         case 0:
             status = B64_SYNTAX_ERROR;
         case 'h':
-            showuse( opt );
+            showuse();
             break;
     }
 
